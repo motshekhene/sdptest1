@@ -113,9 +113,8 @@ matches raw git:
 
 ## AI Declaration
 
-- Claude Web (Opus 5.5) — reviewed
-- This project was developed with the assistance of an AI coding assistant for scaffolding,
-  implementation, and verification.
+- Qoder (agentic IDE) — scaffolding, implementation, verification, and documentation of this
+  submission. No other AI tools were used.
 
 ## Submission
 
