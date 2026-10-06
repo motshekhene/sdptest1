@@ -29,7 +29,11 @@ Notes:
 - All data is stored in `.rat-data/` (created on first run, git-ignored). Delete the folder to
   reset the app to an empty state.
 - If port 3000 is busy: `npm run dev -- -p 3001`.
-- If `npm install` fails on `@tailwindcss/oxide` (npm optional-dependency bug):
+- **Node 18 + Tailwind's native binding — handled automatically.** `@tailwindcss/oxide-linux-x64-gnu@4.3.3`
+  declares `engines: node >= 20`, so npm 9 silently skips it on Node 18, and without it every page
+  returns HTTP 500. The `postinstall` / `predev` / `prebuild` hook (`scripts/ensure-oxide.cjs`)
+  installs it automatically whenever it is missing (the prebuilt binary is N-API compatible with
+  Node 18). If you ever need to install it by hand:
 
   ```bash
   npm i --no-save @tailwindcss/oxide-linux-x64-gnu@4.3.3
