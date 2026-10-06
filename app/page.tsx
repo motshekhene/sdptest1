@@ -182,6 +182,7 @@ export default function HomePage() {
               </label>
               {tab === "url" ? (
                 <input
+                  key="repo-url"
                   className="input w-full font-mono text-xs"
                   placeholder="https://github.com/owner/repo.git"
                   value={url}
@@ -190,6 +191,7 @@ export default function HomePage() {
                 />
               ) : (
                 <input
+                  key="repo-zip"
                   type="file"
                   accept=".zip,application/zip"
                   className="input w-full text-xs file:mr-3 file:cursor-pointer file:rounded file:border-0 file:bg-slate-800 file:px-3 file:py-1 file:text-slate-300"
