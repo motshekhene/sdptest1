@@ -125,10 +125,11 @@ export default function HomePage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-100">Repositories</h1>
+          <h1 className="text-2xl font-semibold text-slate-100">Repository Analysis Tool</h1>
           <p className="mt-1 max-w-2xl text-sm text-slate-400">
-            Analyse git history — file, directory, repository, commit-set and author metrics with
-            rename detection (50%), binary exclusion, mailmap author merging and manual author merges.
+            Measure how a codebase evolved — lines added (l⁺), removed (l⁻), growth (δ) and churn
+            (λ) for every file, directory, repository, commit set and author. Includes rename
+            detection at 50%, binary exclusion, .mailmap handling and manual author merging.
           </p>
         </div>
         <div className="flex gap-2 text-xs text-slate-400">
@@ -143,6 +144,47 @@ export default function HomePage() {
           </span>
         </div>
       </div>
+
+      <details className="card px-4 py-3 text-xs text-slate-400">
+        <summary className="cursor-pointer select-none font-medium text-slate-500 hover:text-slate-300">
+          Metric definitions — how the numbers are computed
+        </summary>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          <div>
+            <p className="font-semibold text-slate-300">File</p>
+            <p className="mt-0.5 leading-relaxed">
+              l⁺ / l⁻ per commit vs its parent; growth δ = l⁺ − l⁻; churn λ = l⁺ + l⁻. Binaries are
+              not measured.
+            </p>
+          </div>
+          <div>
+            <p className="font-semibold text-slate-300">Directory</p>
+            <p className="mt-0.5 leading-relaxed">
+              Recursive sums over immediate files and subdirectories — equivalently over all
+              descendant files.
+            </p>
+          </div>
+          <div>
+            <p className="font-semibold text-slate-300">Repository</p>
+            <p className="mt-0.5 leading-relaxed">
+              Directory metrics on the repository root over the selected commit set.
+            </p>
+          </div>
+          <div>
+            <p className="font-semibold text-slate-300">Commit set H</p>
+            <p className="mt-0.5 leading-relaxed">
+              Non-merge commits reachable from HEAD; n = commits with λ &gt; 0; frequency η = n/|H|;
+              churn rate ρ = λ/|H|.
+            </p>
+          </div>
+          <div>
+            <p className="font-semibold text-slate-300">Author</p>
+            <p className="mt-0.5 leading-relaxed">
+              n and λ restricted to one author (after merging); ownership ω = λ_a / λ_o.
+            </p>
+          </div>
+        </div>
+      </details>
 
       {error && (
         <div className="flex items-start gap-3 rounded-xl border border-red-900 bg-red-950/50 px-4 py-3 text-sm text-red-300">
