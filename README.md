@@ -1,36 +1,104 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# RAT — Repository Analysis Tool
 
-## Getting Started
+A web dashboard for measuring **line-level change metrics** (added, removed, growth, churn) of
+software repositories, by file, directory, repository, commit set, and author — with
+**.mailmap-aware author merging** and **rename-aware** attribution.
 
-First, run the development server:
+Built with **Next.js 15** (App Router, TypeScript, Tailwind CSS v4) and **recharts**.
+
+## Setup
+
+Requires **Node.js 18+** and **git** on the `PATH`.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev        # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Production: `npm run build && npm start`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+> Data persists in `.rat-data/` (git-ignored): the repo registry, checkouts, and a
+> **pre-parsed, gzip-compressed** commit model per repository.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Testing a fresh clone on a machine with the npm optional-dependency bug
 
-## Learn More
+If `@tailwindcss/oxide` fails to install (known npm bug with optional dependencies), run:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm i --no-save @tailwindcss/oxide-linux-x64-gnu@4.3.3
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Features
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Ingestion (both forms from the brief)
+- **Zip upload** — a zipped/compressed repository *including its `.git` directory*. The archive is
+  extracted, the `.git` root is located (nested folders are handled), and the git history is parsed.
+  Upload streams directly to disk (no memory buffering), with a progress bar in the UI.
+- **Remote URL clone** — deep/full clone (`git clone --progress`), with live fetch progress.
 
-## Deploy on Vercel
+Ingestion runs on a background FIFO queue; the dashboard polls status (`queued → cloning/
+extracting → parsing → ready`) with progress bars. Both paths produce identical results:
+the same cJSON content ingested via clone and via zip reports identical stats (955 commits,
+37,166 net lines).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Metric categories (all from the brief)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Category | Where |
+|---|---|
+| **File** metrics | Files table: l⁺, l⁻, δ, n, η, ρ |
+| **Directory** metrics | Directories table + treemap; recursive sums over immediate children |
+| **Repository** metrics | KPI header = root-directory metrics over the whole commit set |
+| **Commit set** metrics | n (commits with λ > 0), η = n/\|H\|, ρ = λ/\|H\| |
+| **Author** metrics | Authors table: n, l⁺, l⁻, λ and **ownership ω = λ_a / λ_o** with share bars |
+
+Formulas implemented per the brief: `δ = l⁺ − l⁻`, `λ = l⁺ + l⁻`, `η = n/|H|`, `ρ = λ/|H|`.
+
+### Filtering
+- **By repository** — dashboard manages multiple repositories simultaneously.
+- **By commit set** — three modes:
+  - *All commits* (reachable from the chosen ref, non-merge only),
+  - *Time period* — `H_t` from t to present, or `[i, j)` — with `datetime-local` inputs,
+  - *Manual list* — pick individual commits (searchable, with "select all matching"),
+  - Author filters also narrow the commit set H (and all denominators |H|)
+- **By author** — multi-select of final (post-merge) authors.
+- **By file/directory** — drill into any path: click a directory in the treemap or table to scope
+  every metric to it (with its children).
+
+### Author merging
+- **.mailmap** is applied exactly as git does (via `git check-mailmap` at parse time).
+- **Manual merging** — on top of mailmap, group any identities into one author (e.g. same person,
+  different names). Merged authors are re-attributed across *all* metrics and ownership.
+
+### Git-correctness details
+- Merge commits are excluded (H ⊆ non-merge commits reachable from HEAD/ref).
+- **Rename detection at 50% similarity** (`-M50%`); pure renames do not distort metrics, and
+  renames-with-changes are attributed to the **new** path.
+- **Binary files are skipped** (not measured), using git's own binary detection.
+- **Deletions** are recorded as line removals on the affected path.
+
+## Architecture (performance)
+
+- **Parse once, query fast**: history is parsed with a single streaming `git log --numstat`
+  pass into a compact, interned model (path/identity indices), stored gzipped. Full metrics for
+  the 11.8k-commit Redis repo return in ~0.4 s; queries are in-memory aggregations.
+- Aggregation is a two-phase scan with per-commit merge maps; derived path→ancestor tables are
+  memoized with `WeakMap`s, and file rows are capped (2000) with an explicit truncation notice.
+- The registry is a small JSON file with atomic writes; ingestion is an in-process queue with
+  per-repo progress and stale-job recovery on restart.
+
+## Verification
+
+`scripts/verify-metrics.sh <repo-id>` cross-checks the API against raw `git log` for:
+time ranges, author filters, manual commit lists, and per-path metrics. All checks pass
+**exactly** on the test repositories (cJSON and Redis — every commit, line, and churn total
+matches raw git).
+
+## AI Declaration
+
+- Claude Web (Opus 5.5) — reviewed
+- This project was developed with the assistance of an AI coding assistant for scaffolding,
+  implementation, and verification.
+
+## Submission
+
+Repository URL: https://github.com/motshekhene/sdptest1
