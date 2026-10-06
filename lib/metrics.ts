@@ -210,6 +210,9 @@ export function computeMetrics(
 
   const totalChurn = totalAdded + totalRemoved;
   const authorRows = [...authors.values()]
+    // Under a file/directory filter, only authors with activity on the object
+    // are interesting; at repository scope every author of H is listed.
+    .filter((a) => object === "" || a.mods > 0 || a.churn > 0)
     .map((a) => ({ ...a, ownership: totalChurn ? a.churn / totalChurn : 0 }))
     .sort((x, y) => y.churn - x.churn || y.commits - x.commits);
 

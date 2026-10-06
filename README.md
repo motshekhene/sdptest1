@@ -80,7 +80,8 @@ Formulas implemented per the brief: `δ = l⁺ − l⁻`, `λ = l⁺ + l⁻`, `�
 
 - **Parse once, query fast**: history is parsed with a single streaming `git log --numstat`
   pass into a compact, interned model (path/identity indices), stored gzipped. Full metrics for
-  the 11.8k-commit Redis repo return in ~0.4 s; queries are in-memory aggregations.
+  the 11.8k-commit Redis repo return in ~0.4 s, and ~1 s for the 61k-commit git.git repo;
+  queries are in-memory aggregations.
 - Aggregation is a two-phase scan with per-commit merge maps; derived path→ancestor tables are
   memoized with `WeakMap`s, and file rows are capped (2000) with an explicit truncation notice.
 - The registry is a small JSON file with atomic writes; ingestion is an in-process queue with
@@ -90,8 +91,14 @@ Formulas implemented per the brief: `δ = l⁺ − l⁻`, `λ = l⁺ + l⁻`, `�
 
 `scripts/verify-metrics.sh <repo-id>` cross-checks the API against raw `git log` for:
 time ranges, author filters, manual commit lists, and per-path metrics. All checks pass
-**exactly** on the test repositories (cJSON and Redis — every commit, line, and churn total
-matches raw git).
+**exactly** on all three provided test repositories — every commit, line, and churn total
+matches raw git:
+
+| Repo | Commits | Added | Removed | Churn |
+|---|---|---|---|---|
+| cJSON | 955 | 46,377 | 11,211 | 57,588 |
+| Redis | 11,874 | 1,110,258 | 500,312 | 1,610,570 |
+| git.git | 61,101 | 4,070,371 | 2,375,604 | 6,445,975 |
 
 ## AI Declaration
 

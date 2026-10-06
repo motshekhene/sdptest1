@@ -156,7 +156,7 @@ export function FilterPanel({
             <div className="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
               <button className="btn-ghost w-full text-xs" onClick={onOpenCommitPicker}>
                 {filters.hashes.length > 0
-                  ? `Edit selection (${fmtNum(filters.hashes.length)} commits)`
+                  ? `Edit selection (${fmtNum(filters.hashes.length)} commit${filters.hashes.length === 1 ? "" : "s"})`
                   : "Select commits…"}
               </button>
               {filters.hashes.length === 0 && (

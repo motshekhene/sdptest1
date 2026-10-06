@@ -142,7 +142,10 @@ export default function RepoAnalysisPage() {
       const t = filters.toInput ? fmtDate(Math.floor(new Date(filters.toInput).getTime() / 1000)) : "now";
       parts.push(`Time period ${f} → ${t}`);
     }
-    if (filters.mode === "list") parts.push(`Manual selection · ${fmtNum(filters.hashes.length)} commits`);
+    if (filters.mode === "list")
+      parts.push(
+        `Manual selection · ${fmtNum(filters.hashes.length)} commit${filters.hashes.length === 1 ? "" : "s"}`,
+      );
     parts.push(
       filters.authors.length === 0 ? "all authors" : `${fmtNum(filters.authors.length)} author filter(s)`,
     );
