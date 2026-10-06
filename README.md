@@ -6,27 +6,34 @@ software repositories, by file, directory, repository, commit set, and author �
 
 Built with **Next.js 15** (App Router, TypeScript, Tailwind CSS v4) and **recharts**.
 
-## Setup
+## Quick start
 
-Requires **Node.js 18+** and **git** on the `PATH`.
-
-```bash
-npm install
-npm run dev        # http://localhost:3000
-```
-
-Production: `npm run build && npm start`.
-
-> Data persists in `.rat-data/` (git-ignored): the repo registry, checkouts, and a
-> **pre-parsed, gzip-compressed** commit model per repository.
-
-### Testing a fresh clone on a machine with the npm optional-dependency bug
-
-If `@tailwindcss/oxide` fails to install (known npm bug with optional dependencies), run:
+Prerequisites: **Node.js 18+** and **git** on your `PATH` (git is required — the app shells
+out to it for cloning and history parsing).
 
 ```bash
-npm i --no-save @tailwindcss/oxide-linux-x64-gnu@4.3.3
+npm install     # 1. install dependencies
+npm run dev     # 2. start the app → http://localhost:3000
 ```
+
+Then open **http://localhost:3000** and add a repository:
+- **Clone URL** tab — paste a repo URL (there is a one-click **cJSON sample**; ingests in ~30 s), or
+- **Zip upload** tab — select a zip of a repository that includes its `.git` directory.
+
+The dashboard tracks ingestion progress (`queued → cloning/extracting → parsing → ready`)
+and a **Open dashboard** button appears when the repo is ready.
+
+Production build: `npm run build && npm start` (serves the same URL).
+
+Notes:
+- All data is stored in `.rat-data/` (created on first run, git-ignored). Delete the folder to
+  reset the app to an empty state.
+- If port 3000 is busy: `npm run dev -- -p 3001`.
+- If `npm install` fails on `@tailwindcss/oxide` (npm optional-dependency bug):
+
+  ```bash
+  npm i --no-save @tailwindcss/oxide-linux-x64-gnu@4.3.3
+  ```
 
 ## Features
 
