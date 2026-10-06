@@ -335,6 +335,7 @@ function KpiGrid({ metrics, loading }: { metrics: MetricsResult | null; loading:
       label: "Commits |H|",
       value: s ? fmtNum(s.commits) : "—",
       title: "Size of the filtered commit set H (non-merge commits reachable from the reference).",
+      sub: "non-merge (per spec)",
     },
     {
       label: "Modifications n",
@@ -365,6 +366,7 @@ function KpiGrid({ metrics, loading }: { metrics: MetricsResult | null; loading:
           <p className={`mt-1 text-lg font-semibold tabular-nums ${it.tone ?? "text-slate-100"}`}>
             {loading ? <span className="inline-block h-5 w-16 animate-pulse rounded bg-slate-800" /> : it.value}
           </p>
+          {it.sub && !loading && <p className="text-[10px] text-slate-500">{it.sub}</p>}
         </div>
       ))}
     </div>
